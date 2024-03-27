@@ -8,7 +8,7 @@ void TransportCatalogue::AddStop(std::string_view name, detail::Coordinates coor
     stopname_to_stop_[last_element.name] = &last_element;
 }
 
-void TransportCatalogue::AddBus(std::string_view name, std::vector<std::string_view>& parsed_stops, bool circle){
+void TransportCatalogue::AddBus(std::string_view name, const std::vector<std::string_view>& parsed_stops, bool circle){
     Bus bus;
     bus.name = std::string{name};
     bus.circle = circle;
@@ -21,14 +21,14 @@ void TransportCatalogue::AddBus(std::string_view name, std::vector<std::string_v
    busname_to_bus_[last_element.name] = &last_element;  
 }
 
-Bus* TransportCatalogue::FindBus(std::string& name){
+Bus* TransportCatalogue::FindBus(std::string_view name){
     if(busname_to_bus_.count(name) != 0){
         return busname_to_bus_.at(name);
     }
     return nullptr;
 }
 
-Stop* TransportCatalogue::FindStop(std::string& name){
+Stop* TransportCatalogue::FindStop(std::string_view name){
     if(stopname_to_stop_.count(name) != 0){
         return stopname_to_stop_.at(name);
     }
@@ -92,7 +92,7 @@ void TransportCatalogue::PrintStops(){
     void TransportCatalogue::PrintBuses(){
    
     std::cout << "PRINT BUSES" << std::endl;
-    for (const auto bus : buses_){
+    for (const auto& bus : buses_){
         std::cout << bus.name << ":";
         for (const auto stop : bus.stops){
             std::cout << stop->name << " ";

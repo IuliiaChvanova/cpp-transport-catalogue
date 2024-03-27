@@ -35,11 +35,11 @@ public:
     //Добавление остановки в базу
     void AddStop(std::string_view name, detail::Coordinates coordinates);
    // добавление маршрута в базу
-    void AddBus(std::string_view name, std::vector<std::string_view>& parsed_stops, bool circle);
+    void AddBus(std::string_view name, const std::vector<std::string_view>& parsed_stops, bool circle);
     //поиск маршрута по имени
-    Bus* FindBus(std::string& name); 
+    Bus* FindBus(std::string_view name); 
     //поиск остановки по имени
-    Stop* FindStop (std::string& name);
+    Stop* FindStop (std::string_view name);
     //получение информации о маршруте.
     BusInfo GetBusInfo(std::string_view name) const;
     StopInfo GetStopInfo(std::string_view name) const;
