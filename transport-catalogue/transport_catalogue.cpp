@@ -77,6 +77,7 @@ StopInfo TransportCatalogue::GetStopInfo(std::string_view name) const{
     return stop_info;
 }
 
+/*
 void TransportCatalogue::PrintStops(){
  
     std::cout << "PRINT STOPS" << std::endl;
@@ -110,6 +111,7 @@ void TransportCatalogue::PrintStops(){
   
     }
 
+*/
     
 
 

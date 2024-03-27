@@ -43,9 +43,9 @@ public:
     //получение информации о маршруте.
     BusInfo GetBusInfo(std::string_view name) const;
     StopInfo GetStopInfo(std::string_view name) const;
-    void PrintStops();
-    void PrintBuses();
-    void PrintStopsMap();
+   // void PrintStops();
+    //void PrintBuses();
+    //void PrintStopsMap();
     
 private:
      class StringViewHasher{
