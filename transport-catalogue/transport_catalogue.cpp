@@ -8,6 +8,13 @@ void TransportCatalogue::AddStop(std::string_view name, detail::Coordinates coor
     stopname_to_stop_[last_element.name] = &last_element;
 }
 
+void TransportCatalogue::AddDistance (std::string_view stop1, std::string_view stop2, int distance){
+    Stop* stop1_ptr = stopname_to_stop_[stop1];
+    Stop* stop2_ptr = stopname_to_stop_[stop2];
+    distances_[std::pair{stop1_ptr,stop2_ptr}] = distance;
+}
+
+
 void TransportCatalogue::AddBus(std::string_view name, const std::vector<std::string_view>& parsed_stops, bool circle){
     Bus bus;
     bus.name = std::string{name};
@@ -38,15 +45,22 @@ Stop* TransportCatalogue::FindStop(std::string_view name){
 BusInfo TransportCatalogue::GetBusInfo(std::string_view name) const{
     using namespace detail;
     BusInfo bus_info;
+    double geographic_distance = 0;
     if(busname_to_bus_.count(name) ==  0){
         bus_info.found = false;
         return bus_info;
     }
     std::vector<Stop*> stops = busname_to_bus_.at(name)->stops;
     std::set<std::string> unique_stops;
+    Stop* prev_stop = nullptr;
     for (const auto& stop : stops){
         unique_stops.insert(stop->name);
+        if(prev_stop){
+            bus_info.route_length += distances_.at({prev_stop,stop}); 
+        }
+        prev_stop = stop;
     }
+    
     
     if(busname_to_bus_.at(name)->circle == true){
         bus_info.stops_on_route = stops.size();
@@ -56,10 +70,12 @@ BusInfo TransportCatalogue::GetBusInfo(std::string_view name) const{
         bus_info.unique_stops = unique_stops.size();
     }
     
-    //calculate distance
+    //calculate geographic distance 
     for(int i = 0; i < stops.size() - 1; ++i){
-        bus_info.route_length += ComputeDistance(stops[i]->coordinates, stops[i + 1]->coordinates);
+        geographic_distance += ComputeDistance(stops[i]->coordinates, stops[i + 1]->coordinates);
     }
+   bus_info.curvature = bus_info.route_length/geographic_distance;
+    
     return bus_info;
 }
 
@@ -76,45 +92,3 @@ StopInfo TransportCatalogue::GetStopInfo(std::string_view name) const{
     }
     return stop_info;
 }
-
-/*
-void TransportCatalogue::PrintStops(){
- 
-    std::cout << "PRINT STOPS" << std::endl;
-    //print stops
-    for (const auto& stop : all_stops_){
-        std::cout << stop.name << " " << stop.name.size() << std::endl;
-    }
-    std::cout << std::endl;
-  
-    
-    }
-
-    void TransportCatalogue::PrintBuses(){
-   
-    std::cout << "PRINT BUSES" << std::endl;
-    for (const auto& bus : buses_){
-        std::cout << bus.name << ":";
-        for (const auto stop : bus.stops){
-            std::cout << stop->name << " ";
-        }
-        std::cout << std::endl;
-    }
-    }
-
-    void TransportCatalogue::PrintStopsMap(){
-        std::cout << "PRINT STOPS MAP" << std::endl;
-    for (auto& [name, stop] : stopname_to_stop_){
-        std::cout << std::string{name} << "-" << stop->name << std::endl;
-    }
-    std::cout << std::endl;
-  
-    }
-
-*/
-    
-
-
-
-
-

@@ -1,8 +1,10 @@
 #include "input_reader.h"
-
 #include <algorithm>
 #include <cassert>
 #include <iterator>
+#include <map>    
+#include <vector>   
+#include <utility>    
 
 /**
  * Парсит строку вида "10.123,  -30.1837" и возвращает пару координат (широта, долгота)
@@ -103,11 +105,61 @@ void InputReader::ParseLine(std::string_view line) {
         commands_.push_back(std::move(command_description));
     }
 }
+    
+void GetDescriptionsWithDistances(std::vector<std::pair<std::string_view, std::string_view>>& description_dist, std::string_view str, std::string_view stop_name){
+    
+    auto comma = str.find(',');
+    
+  bool prev_comma = false;
+    while(comma != std::string::npos){
+  
+    auto second_comma = str.find(',', comma + 1);
+    if (second_comma != std::string::npos && prev_comma == true){
+        auto discription = str.substr(comma + 1, second_comma - comma - 1);
+       description_dist.push_back({stop_name,discription});
+       
+    }
+    if(second_comma == std::string::npos){
+        if(prev_comma == true){
+            auto discription = str.substr(comma + 1);
+            description_dist.push_back({stop_name,discription});
+        }
+        break;
+    } else {
+       comma = str.find(',', second_comma + 1); 
+       if (comma != std::string::npos){
+          prev_comma = true; 
+       }
+       auto discription = str.substr(second_comma+1, comma -second_comma - 1 );
+       description_dist.push_back({stop_name,discription});
+    }
+    }   
+}    
+    
+void ParseDistances(std::map<std::pair<std::string_view, std::string_view>,int>& stop_dist,  std::string_view str, std::string_view stop_1) {
+   
+    auto number = str.find_first_not_of(' ');
+    auto space = str.find(' ');
+    int distance = std::stoi(std::string((str.substr(number, space - number))));
+    
+    auto to_word = str.find_first_not_of(' ', space + 1);
+    space = str.find(' ', to_word);
+    auto stop = str.find_first_not_of(' ', space + 1);
+    auto stop_2 = str.substr(stop);
+
+    std::pair<std::string_view, std::string_view> stops1(stop_1, stop_2);
+    std::pair<std::string_view, std::string_view> stops2(stop_2, stop_1);
+   stop_dist[stops1] = distance;
+    if(stop_dist.count (stops2) == 0){
+        stop_dist[stops2] = distance;
+    }
+    } 
 
 void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) const {
-    // Реализуйте метод самостоятельно
     // first proceed only Stops 
     std::vector<CommandDescription> only_buses;
+    std::vector<std::pair<std::string_view,std::string_view>> description_dist;
+    std::map<std::pair<std::string_view, std::string_view>, int> stops_distance;
     for (const auto& command : commands_){
         if(command.command == "Stop"){
             std::string_view name = detail::Trim(command.id);
@@ -117,6 +169,22 @@ void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) 
             only_buses.push_back(command);
         }
         }
+    //еще раз итерируюсь по остановкам чтобы добавить расстояния
+    for (const auto& command: commands_){
+        if(command.command == "Stop"){
+    std::string_view stop_name = detail::Trim(command.id);
+            GetDescriptionsWithDistances( description_dist, command.description, stop_name);
+        }
+    }
+    for (const auto& [stop_name,description]: description_dist){
+        std::string_view command = detail::Trim(description);
+            ParseDistances(stops_distance, command,stop_name);
+         
+    }
+    for (const auto& [stops, distance] : stops_distance){
+        catalogue.AddDistance (stops.first, stops.second, distance);
+    }
+
     for (const auto& command : only_buses){
         std::string_view name = detail::Trim(command.id);
         bool circle;
@@ -127,6 +195,4 @@ void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) 
         catalogue.AddBus(name, parsed_stops, circle); 
     }
  
-        
-   
 }
