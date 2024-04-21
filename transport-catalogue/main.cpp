@@ -2,37 +2,36 @@
 #include <cassert>
 #include <string>
 
-#include "input_reader.h"
-#include "stat_reader.h"
+#include "map_renderer.h"
+#include "request_handler.h"
+#include "json_reader.h"
 
 using namespace std;
 
 int main() {
-    TransportCatalogue catalogue;
+   
+  /* 
+int main() {
+   
+     * Примерная структура программы:
+     *
+     * Считать JSON из stdin
+     * Построить на его основе JSON базу данных транспортного справочника
+     * Выполнить запросы к справочнику, находящиеся в массивe "stat_requests", построив JSON-массив
+     * с ответами Вывести в stdout ответы в виде JSON
 
-    int base_request_count;
-    cin >> base_request_count >> ws;
-
-    {
-        InputReader reader;
-        for (int i = 0; i < base_request_count; ++i) {
-            string line;
-            getline(cin, line);
-            reader.ParseLine(line);
-        }
-    
-        reader.ApplyCommands(catalogue);
-    }
-    
-    
-
-
-    int stat_request_count;
-    cin >> stat_request_count >> ws;
-    for (int i = 0; i < stat_request_count; ++i) {
-        string line;
-        getline(cin, line);
-        ParseAndPrintStat(catalogue, line, cout);
-    }
+}
+ */
   
+    JsonReader json_reader(std::cin);
+    const TransportCatalogue& catalogue = json_reader.BuildTransportCatalogue();
+    const RenderSettings& render_settings = json_reader.GetRenderSettings();
+    const MapRenderer map_renderer(render_settings);
+    RequestHandler request_handler(catalogue, map_renderer);
+   // svg::Document doc_out = request_handler.RenderMap(std::cout);
+    
+    json::Document doc_out = json_reader.MakeJsonDocument(request_handler);
+    
+    json::Print(doc_out, std::cout);
+ 
 }
