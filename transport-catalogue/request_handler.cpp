@@ -35,7 +35,7 @@ const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() c
  //Новая версия
 
 [[maybe_unused]] svg::Document RequestHandler::RenderMap(std::ostream& output) const {
-
+    std::vector<std::variant<svg::Polyline,svg::Text, svg::Circle >> drawing;
     svg::Document doc;
     const std::set<std::string_view> sorted_buses_names = GetSortedBusesNamesOnRoute();
     std::vector<Bus*> buses_ptrs;
@@ -51,7 +51,18 @@ const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() c
         stops_ptrs.push_back(transport_catalogue_.FindStop(stop_name)); 
     }
 
-    renderer_.RenderMap (doc ,buses_ptrs, stops_ptrs);
+    renderer_.RenderMap (drawing ,buses_ptrs, stops_ptrs);
+    for (const auto& item : drawing){
+        if(holds_alternative<svg::Polyline>(item)) {
+            doc.Add(get<svg::Polyline>(item));
+        }
+        if(holds_alternative<svg::Text>(item)) {
+            doc.Add(get<svg::Text>(item));
+        }
+        if(holds_alternative<svg::Circle>(item)) {
+            doc.Add(get<svg::Circle>(item));
+        }
+    }
     doc.Render(output);
 
     return  doc;
