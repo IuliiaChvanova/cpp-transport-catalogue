@@ -25,13 +25,15 @@ int main() {
   
     JsonReader json_reader(std::cin);
     const TransportCatalogue& catalogue = json_reader.BuildTransportCatalogue();
-    const RenderSettings& render_settings = json_reader.GetRenderSettings();
-    const MapRenderer map_renderer(render_settings);
+   const RenderSettings& render_settings = json_reader.GetRenderSettings();
+  const MapRenderer map_renderer(render_settings);
     RequestHandler request_handler(catalogue, map_renderer);
    // svg::Document doc_out = request_handler.RenderMap(std::cout);
     
     json::Document doc_out = json_reader.MakeJsonDocument(request_handler);
     
     json::Print(doc_out, std::cout);
+    
+  
  
 }

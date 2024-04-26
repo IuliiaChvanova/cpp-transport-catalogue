@@ -32,15 +32,16 @@ const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() c
 }
 
 
-
+ //Новая версия
 
 [[maybe_unused]] svg::Document RequestHandler::RenderMap(std::ostream& output) const {
 
+    svg::Document doc;
     const std::set<std::string_view> sorted_buses_names = GetSortedBusesNamesOnRoute();
     std::vector<Bus*> buses_ptrs;
     std::vector<Stop*> stops_ptrs;
     std::vector<std::vector<geo::Coordinates>> geo_coordinates_for_each_bus;
-    std::vector<geo::Coordinates> all_geo_coordinates = transport_catalogue_.GetAllStopsCoordinatesForBuses();
+    
     std::vector<geo::Coordinates> geo_coordinates;
     
     for (const auto& bus_name : sorted_buses_names) {
@@ -54,11 +55,11 @@ const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() c
         stops_ptrs.push_back(transport_catalogue_.FindStop(stop_name)); 
     }
 
-    svg::Document doc = renderer_.RenderMap (output
-                                        ,all_geo_coordinates
-                                        ,geo_coordinates_for_each_bus
-                                        ,buses_ptrs
-                                        ,stops_ptrs);
+    renderer_.RenderMap (doc
+                        ,geo_coordinates_for_each_bus
+                        ,buses_ptrs
+                        ,stops_ptrs);
+    doc.Render(output);
 
     return  doc;
 }
@@ -77,8 +78,8 @@ const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() c
 
 
 
-/* Предыдущая версия 
-
+// Предыдущая версия 
+/*
  [[maybe_unused]] svg::Document RequestHandler::RenderMap(std::ostream& output) const {
     const std::set<std::string_view> buses = GetSortedBusesNamesOnRoute();
     std::vector<geo::Coordinates> geo_coordinates;

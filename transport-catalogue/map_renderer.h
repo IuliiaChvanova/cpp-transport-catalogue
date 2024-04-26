@@ -145,12 +145,9 @@ public:
     std::vector<svg::Point> ProjectCoordinates (const std::vector<geo::Coordinates> geo_coords, const SphereProjector& sphere_projector) const;
     const SphereProjector CreateSphereProjector (const std::vector<geo::Coordinates> all_coords) const;
 
-     [[maybe_unused]]svg::Document RenderMap (std::ostream& output 
+  void RenderMap (svg::Document& doc,  const std::vector<std::vector<geo::Coordinates>>& geo_coordinates_for_each_bus,
+const std::vector<Bus*>& buses_ptrs, const std::vector<Stop*>& stops_ptrs) const;
                                             
-                                            ,std::vector<geo::Coordinates> all_geo_coordinates
-                                            ,std::vector<std::vector<geo::Coordinates>> geo_coordinates_for_each_bus
-                                            ,std::vector<Bus*> buses_ptrs
-                                            ,std::vector<Stop*> stops_ptrs) const;
     
 private:
 

@@ -138,22 +138,16 @@ const SphereProjector MapRenderer::CreateSphereProjector(const std::vector<geo::
                                     ,render_settings_.padding};                              
 }
 
+void MapRenderer::RenderMap (svg::Document& doc,  const std::vector<std::vector<geo::Coordinates>>& geo_coordinates_for_each_bus,
+const std::vector<Bus*>& buses_ptrs, const std::vector<Stop*>& stops_ptrs) const {
 
-
-//Вместо всеъ этих аргументов(векторов) можно было бы просто передать объект 
-//transport_catalogue и получить доступ к остановкам, но в задании было написано
-// "request_handler получает данные о маршрутах у транспортного справочника и передаёт их модулю map_renderer. Это позволяет устранить зависимость map_renderer от transport_catalogue. Изменения в transport_catalogue не будут влиять на map_renderer, ведь он зависит только от модулей domain и geo." 
-
-//Поэтому решила передавать кучу аргументов
-[[maybe_unused]]svg::Document MapRenderer::RenderMap (std::ostream& output 
-                                                    
-                                                    ,std::vector<geo::Coordinates> all_geo_coordinates
-                                                    ,std::vector<std::vector<geo::Coordinates>> geo_coordinates_for_each_bus
-                                                    ,std::vector<Bus*> buses_ptrs
-                                                    ,std::vector<Stop*> stops_ptrs) const {
-
+    std::vector<geo::Coordinates> all_geo_coordinates;
+    for (const auto& stop : stops_ptrs){
+        all_geo_coordinates.push_back(stop->coordinates);
+       
+    }
    
-    svg::Document doc;
+    //svg::Document doc;
     int bus_order = 0;
     const SphereProjector sphere_projector = CreateSphereProjector(all_geo_coordinates);
     
@@ -192,8 +186,7 @@ const SphereProjector MapRenderer::CreateSphereProjector(const std::vector<geo::
         }
     }
 
-    doc.Render(output);
-    return  doc;
+   
 }
 
 
