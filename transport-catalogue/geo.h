@@ -1,7 +1,6 @@
 //#pragma oncea
 #pragma once
 #include <cmath>
-
 namespace geo {
 
 const int RADIUS = 6371000;

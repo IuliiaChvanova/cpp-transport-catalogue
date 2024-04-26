@@ -4,6 +4,7 @@
 #include "transport_catalogue.h"
 
 
+
 /*
  * Здесь можно было бы разместить код обработчика запросов к базе, содержащего логику, которую не
  * хотелось бы помещать ни в transport_catalogue, ни в json reader.
@@ -20,17 +21,26 @@
 // См. паттерн проектирования Фасад: https://ru.wikipedia.org/wiki/Фасад_(шаблон_проектирования)
 
 
+
 class RequestHandler {
 public:
+    // MapRenderer понадобится в следующей части итогового проекта
+   // RequestHandler(const TransportCatalogue& db, const renderer::MapRenderer& renderer);
      RequestHandler(const TransportCatalogue& db, const MapRenderer& renderer);
 
     // Возвращает информацию о маршруте (запрос Bus)
     const BusInfo GetBusInfo(const std::string_view& bus_name) const;
 
     // Возвращает маршруты, проходящие через остановку
-   const StopInfo GetStopInfo(const std::string_view& stop_name) const; 
+   const StopInfo GetStopInfo(const std::string_view& stop_name) const;
+
+  
+   
+    // Этот метод будет нужен в следующей части итогового проекта
+    
    [[maybe_unused]]svg::Document RenderMap (std::ostream& output) const;
    
+
 private:
   const std::set<std::string_view> GetSortedBusesNamesOnRoute() const;
     // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"

@@ -13,6 +13,7 @@ public:
     JsonReader(std::istream& input);
     TransportCatalogue BuildTransportCatalogue();
     json::Document MakeJsonDocument(RequestHandler& request_handler);
+
     RenderSettings GetRenderSettings();
     
 private:
@@ -23,6 +24,8 @@ private:
     void AddBusInfoInJSON (RequestHandler& request_handler, std::string_view stop_name, int request_id, json::Array& out_array);
     void AddVisualisationMapInJSON(RequestHandler& request_handler, int request_id, json::Array& out_array);
      //-------Functions for map_render ------------
-    void AddColor (std::vector<json::Node> color_vector, json::Node underlayer_color_vector, std::vector<svg::Color>& color_palette, svg::Color& underlayer_color );
+   void AddColor (std::vector<json::Node> color_vector, json::Node underlayer_color_vector, std::vector<svg::Color>& color_palette, svg::Color& underlayer_color );
+
+    
     json::Document requests_;
 };

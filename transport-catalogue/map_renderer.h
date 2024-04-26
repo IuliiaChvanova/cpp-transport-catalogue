@@ -11,6 +11,10 @@
 
 inline const double EPSILON = 1e-6;
 
+
+
+
+
 class SphereProjector {
 public:
     // points_begin и points_end задают начало и конец интервала элементов geo::Coordinates
@@ -45,7 +49,15 @@ public:
         if (!IsZeroValue(max_lon - min_lon_)) {
             width_zoom = (max_width - 2 * padding) / (max_lon - min_lon_);
         }
+     
     
+    /*
+       // instead of above function
+       if(!(std::abs(max_lon - min_lon_) < EPSILON)){
+            width_zoom = (max_width - 2 * padding) / (max_lon - min_lon_);
+       }
+       */
+
         // Вычисляем коэффициент масштабирования вдоль координаты y
         std::optional<double> height_zoom;
        
@@ -53,6 +65,13 @@ public:
          height_zoom = (max_height - 2 * padding) / (max_lat_ - min_lat);
        }
       
+       /*
+       // instead of above function 
+        if(!(std::abs(max_lat_ - min_lat) < EPSILON)){
+            height_zoom = (max_height - 2 * padding) / (max_lat_ - min_lat);
+       }
+       */
+
         if (width_zoom && height_zoom) {
             // Коэффициенты масштабирования по ширине и высоте ненулевые,
             // берём минимальный из них
@@ -74,6 +93,9 @@ public:
         };
     }
 
+
+    
+
 private:
 
     bool IsZeroValue(double value) {
@@ -85,36 +107,55 @@ private:
     double zoom_coeff_ = 0;
 };
 
+
+
 struct RenderSettings {
     double width;
     double height;
+
     double padding;
+
     double line_width;
     double stop_radius;
-    int bus_label_font_size; 
+
+    int bus_label_font_size; //???????? type ???? int or double
     std::vector<double> bus_label_offset;
-    int stop_label_font_size; 
+
+    int stop_label_font_size; //???????? type ???? int or double
     std::vector<double> stop_label_offset;
+
     svg::Color underlayer_color;
     double underlayer_width;
+
     std::vector<svg::Color> color_palette;
 };
 
 class MapRenderer {
 public:    
     MapRenderer(const RenderSettings& render_settings)
-        :render_settings_(render_settings){
-    }
+        :render_settings_(render_settings)
+        {
+        }
     svg::Polyline DrawBusRoute(const std::vector<geo::Coordinates> geo_coords, int bus_order, const SphereProjector& sphere_projector) const;
     std::vector<svg::Text> DrawBusName(const Bus* bus, int bus_order, const SphereProjector& sphere_projector) const;
     svg::Circle DrawStop(const Stop* stop, const SphereProjector& sphere_projector) const;
     std::vector<svg::Text> DrawStopName(const Stop* stop, const SphereProjector& sphere_projector) const;
+
     std::vector<svg::Text> DrawBusTextAndUnderlayer(const Bus* bus, int bus_order, int stop_order, const SphereProjector& sphere_projector) const;
     std::vector<svg::Point> ProjectCoordinates (const std::vector<geo::Coordinates> geo_coords, const SphereProjector& sphere_projector) const;
     const SphereProjector CreateSphereProjector (const std::vector<geo::Coordinates> all_coords) const;
 
+     [[maybe_unused]]svg::Document RenderMap (std::ostream& output 
+                                            
+                                            ,std::vector<geo::Coordinates> all_geo_coordinates
+                                            ,std::vector<std::vector<geo::Coordinates>> geo_coordinates_for_each_bus
+                                            ,std::vector<Bus*> buses_ptrs
+                                            ,std::vector<Stop*> stops_ptrs) const;
+    
 private:
+
     const RenderSettings render_settings_;  
+    
 };
 
 

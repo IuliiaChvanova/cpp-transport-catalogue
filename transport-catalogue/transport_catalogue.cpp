@@ -25,7 +25,7 @@ std::optional<int> TransportCatalogue::GetDistance (std::string_view from_stop, 
     
 }
 
-
+/*
 void TransportCatalogue::AddBus(std::string_view name, const std::vector<std::string_view>& parsed_stops, bool circle){
     Bus bus;
     bus.name = std::string{name};
@@ -35,16 +35,36 @@ void TransportCatalogue::AddBus(std::string_view name, const std::vector<std::st
         bus.stops.push_back(stop_ptr);
         stop_to_busname_[stop_ptr].insert(bus.name);  
     }
+    auto& last_element = buses_.emplace_back(bus);
+   busname_to_bus_[last_element.name] = &last_element;  
+}
+*/
+
+void TransportCatalogue::AddBus(std::string_view name, const std::vector<std::string_view>& parsed_stops, bool circle){
+    Bus bus;
+    bus.name = std::string{name};
+    bus.circle = circle;
+    //Stop* first_stop_ptr = nullptr;
+   // bool first = true;
+    for (const auto stop : parsed_stops){
+        
+        Stop* stop_ptr = stopname_to_stop_[stop];
+        bus.stops.push_back(stop_ptr);
+        stop_to_busname_[stop_ptr].insert(bus.name);  
+    }
 
     //add stops to the end of "stops" vector depending on Bus type
-    if (bus.circle == false){
+    if (bus.circle == true){
+        //bus.stops.push_back(first_stop_ptr);
+    } else {
         int i = bus.stops.size() - 2;
         for (; i >= 0; --i){
             bus.stops.push_back(bus.stops[i]);
         }
-    } 
+    }
+
     auto& last_element = buses_.emplace_back(bus);
-    busname_to_bus_[last_element.name] = &last_element;  
+   busname_to_bus_[last_element.name] = &last_element;  
 }
 
 Bus* TransportCatalogue::FindBus(std::string_view name) const {
@@ -72,6 +92,19 @@ BusInfo TransportCatalogue::GetBusInfo(std::string_view name) const{
     std::vector<Stop*> stops = busname_to_bus_.at(name)->stops;
     std::set<std::string> unique_stops;
     Stop* prev_stop = nullptr;
+   
+
+    //------New--------------------------
+    //add stops to the end of "stops" vector depending on Bus type
+    /*
+    if (busname_to_bus_.at(name)->circle == true){
+        stops.push_back(stops[0]);
+    } else {
+        for (int i = stops.size() - 2; i >= 0; --i){
+            stops.push_back(stops[i]);
+        }
+    }
+    */
 
     for (const auto& stop : stops){
         unique_stops.insert(stop->name);
@@ -80,6 +113,7 @@ BusInfo TransportCatalogue::GetBusInfo(std::string_view name) const{
         }
         prev_stop = stop;
     }
+
    
     if(busname_to_bus_.at(name)->circle == true){
         bus_info.stops_on_route = stops.size();
@@ -90,12 +124,14 @@ BusInfo TransportCatalogue::GetBusInfo(std::string_view name) const{
         bus_info.unique_stops = unique_stops.size();
     }
    
+
+    
     //calculate geographic distance 
     for (size_t i = 0; i < stops.size() - 1; ++i){
         geographic_distance += ComputeDistance(stops[i]->coordinates, stops[i + 1]->coordinates);
        
     }
-    bus_info.curvature = bus_info.route_length/geographic_distance;
+   bus_info.curvature = bus_info.route_length/geographic_distance;
     
     return bus_info;
 }
@@ -126,6 +162,7 @@ const std::set<std::string_view>  TransportCatalogue::GetSortedBusesNames() cons
 
 const std::set<std::string_view> TransportCatalogue::GetSortedStopsNames() const {
     std::set<std::string_view> names_set;
+    
     for (const auto& bus : buses_){
         for (const auto& stop : bus.stops){
             names_set.insert(stop->name);

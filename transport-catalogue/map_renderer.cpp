@@ -8,12 +8,17 @@
 
 std::vector<svg::Point>  MapRenderer::ProjectCoordinates(const std::vector<geo::Coordinates> geo_coords, const SphereProjector& sphere_projector) const {
      std::vector<svg::Point> screen_coords;
+
+                              
+    //std::vector<Stop*> stops = bus->stops;
     for (const auto& geo_coord : geo_coords){
         const svg::Point screen_coord = sphere_projector(geo_coord);
         screen_coords.push_back(screen_coord);
     }
+
     return screen_coords;
 }
+
 
 svg::Polyline MapRenderer::DrawBusRoute(const std::vector<geo::Coordinates> geo_coords,int bus_order, const SphereProjector& sphere_projector) const {
    std::vector<svg::Point> screen_coords = ProjectCoordinates(geo_coords, sphere_projector);
@@ -23,9 +28,7 @@ svg::Polyline MapRenderer::DrawBusRoute(const std::vector<geo::Coordinates> geo_
         polyline.AddPoint(point);
 
     }
-    polyline.SetFillColor("none").SetStrokeWidth(render_settings_.line_width).SetStrokeLineCap(svg::StrokeLineCap::ROUND);
-    polyline.SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
-    polyline.SetStrokeColor(render_settings_.color_palette[bus_order%render_settings_.color_palette.size()]);
+    polyline.SetFillColor("none").SetStrokeWidth(render_settings_.line_width).SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND).SetStrokeColor(render_settings_.color_palette[bus_order%render_settings_.color_palette.size()]);
     return polyline;
 }  
 
@@ -33,12 +36,12 @@ std::vector<svg::Text> MapRenderer::DrawBusTextAndUnderlayer(const Bus* bus, int
     std::vector<svg::Text> text_underlayer;
     svg::Text text;
     svg::Text underlayer;
-    geo::Coordinates stop_coords = bus->stops[stop_order]->coordinates; //lng -x, lat -y
-    std::vector<geo::Coordinates> stop_coord_vect;
-    stop_coord_vect.push_back(stop_coords);
-    std::vector<svg::Point> screen_coords = ProjectCoordinates(stop_coord_vect, sphere_projector);
-    
-    //свойства подложки
+   geo::Coordinates stop_coords = bus->stops[stop_order]->coordinates; //lng -x, lat -y
+   std::vector<geo::Coordinates> stop_coord_vect;
+   stop_coord_vect.push_back(stop_coords);
+   std::vector<svg::Point> screen_coords = ProjectCoordinates(stop_coord_vect, sphere_projector);
+   //спроецировать остановки
+     //свойства подложки
     underlayer.SetPosition(screen_coords[0]);
     underlayer.SetOffset(svg::Point{render_settings_.bus_label_offset[0], render_settings_.bus_label_offset[1]});
     underlayer.SetFontSize(render_settings_.bus_label_font_size);
@@ -50,6 +53,8 @@ std::vector<svg::Text> MapRenderer::DrawBusTextAndUnderlayer(const Bus* bus, int
     underlayer.SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
     underlayer.SetData(bus->name);
 
+    
+    
     // общие свойства
     text.SetPosition(screen_coords[0]);
     text.SetOffset(svg::Point{render_settings_.bus_label_offset[0], render_settings_.bus_label_offset[1]});
@@ -59,6 +64,7 @@ std::vector<svg::Text> MapRenderer::DrawBusTextAndUnderlayer(const Bus* bus, int
     text.SetFillColor(render_settings_.color_palette[bus_order%render_settings_.color_palette.size()]);
     text.SetData(bus->name);
 
+   
     text_underlayer.push_back(underlayer);
     text_underlayer.push_back(text);
     return text_underlayer;
@@ -83,10 +89,11 @@ std::vector<svg::Text> MapRenderer::DrawStopName(const Stop* stop, const SphereP
     std::vector<svg::Text> result;
     svg::Text text;
     svg::Text underlayer;
-    std::vector<geo::Coordinates> stop_coord_vect;
-    stop_coord_vect.push_back(stop->coordinates);
-    std::vector<svg::Point> screen_coords = ProjectCoordinates(stop_coord_vect, sphere_projector);
-
+  
+   std::vector<geo::Coordinates> stop_coord_vect;
+   stop_coord_vect.push_back(stop->coordinates);
+   std::vector<svg::Point> screen_coords = ProjectCoordinates(stop_coord_vect, sphere_projector);
+   //спроецировать остановки
      //свойства подложки
     underlayer.SetPosition(screen_coords[0]);
     underlayer.SetOffset(svg::Point{render_settings_.stop_label_offset[0], render_settings_.stop_label_offset[1]});
@@ -111,22 +118,82 @@ std::vector<svg::Text> MapRenderer::DrawStopName(const Stop* stop, const SphereP
     return result;
 }
 
+
 svg::Circle MapRenderer::DrawStop(const Stop* stop, const SphereProjector& sphere_projector) const {
     svg::Circle stop_symbol;
-    std::vector<geo::Coordinates> stop_coord_vect;
-    stop_coord_vect.push_back(stop->coordinates);
-    std::vector<svg::Point> screen_coords = ProjectCoordinates(stop_coord_vect, sphere_projector);
-    stop_symbol.SetCenter(screen_coords[0]).SetRadius(render_settings_.stop_radius).SetFillColor("white");
+   std::vector<geo::Coordinates> stop_coord_vect;
+   stop_coord_vect.push_back(stop->coordinates);
+   std::vector<svg::Point> screen_coords = ProjectCoordinates(stop_coord_vect, sphere_projector);
+   stop_symbol.SetCenter(screen_coords[0]).SetRadius(render_settings_.stop_radius).SetFillColor("white");
     return stop_symbol;
 }
 
+
 const SphereProjector MapRenderer::CreateSphereProjector(const std::vector<geo::Coordinates> all_coords) const {
     
-return  SphereProjector{all_coords.begin()
-                        ,all_coords.end()
-                        ,render_settings_.width
-                        ,render_settings_.height
-                        ,render_settings_.padding};                              
+    return  SphereProjector{all_coords.begin()
+                                    ,all_coords.end()
+                                    ,render_settings_.width
+                                    ,render_settings_.height
+                                    ,render_settings_.padding};                              
+}
+
+
+
+//Вместо всеъ этих аргументов(векторов) можно было бы просто передать объект 
+//transport_catalogue и получить доступ к остановкам, но в задании было написано
+// "request_handler получает данные о маршрутах у транспортного справочника и передаёт их модулю map_renderer. Это позволяет устранить зависимость map_renderer от transport_catalogue. Изменения в transport_catalogue не будут влиять на map_renderer, ведь он зависит только от модулей domain и geo." 
+
+//Поэтому решила передавать кучу аргументов
+[[maybe_unused]]svg::Document MapRenderer::RenderMap (std::ostream& output 
+                                                    
+                                                    ,std::vector<geo::Coordinates> all_geo_coordinates
+                                                    ,std::vector<std::vector<geo::Coordinates>> geo_coordinates_for_each_bus
+                                                    ,std::vector<Bus*> buses_ptrs
+                                                    ,std::vector<Stop*> stops_ptrs) const {
+
+   
+    svg::Document doc;
+    int bus_order = 0;
+    const SphereProjector sphere_projector = CreateSphereProjector(all_geo_coordinates);
+    
+    //----------------- Отрисовываем линиии маршрутов-----------------
+    for (const auto& geo_coordinates : geo_coordinates_for_each_bus) {
+       
+        //const SphereProjector sphere_projector = renderer_.CreateSphereProjector(all_geo_coordinates);
+        svg::Polyline polyline = DrawBusRoute(geo_coordinates, bus_order, sphere_projector);
+        ++bus_order;
+        doc.Add(std::move(polyline));
+    }
+
+    //----------------- Названия Маршрутов-----------------
+    bus_order = 0;
+    for (const auto& bus_ptr : buses_ptrs) {
+        std::vector<svg::Text> name = DrawBusName(bus_ptr, bus_order, sphere_projector);
+        for (const auto& text : name) {
+            doc.Add(std::move(text));
+        }
+        ++bus_order;
+    }
+
+    //----------------- Отрисовываем круги остановок-----------------
+
+    
+    for (const auto& stop : stops_ptrs){
+        svg::Circle stop_symbol = DrawStop(stop, sphere_projector);
+        doc.Add(std::move(stop_symbol));
+    }
+
+    //------------------Названия остановок-----------------
+    for (const auto& stop : stops_ptrs){
+        std::vector<svg::Text> name = DrawStopName(stop, sphere_projector);
+        for (const auto& text : name) {
+            doc.Add(std::move(text));
+        }
+    }
+
+    doc.Render(output);
+    return  doc;
 }
 
 
