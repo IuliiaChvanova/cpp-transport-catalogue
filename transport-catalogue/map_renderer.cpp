@@ -138,7 +138,26 @@ const SphereProjector MapRenderer::CreateSphereProjector(const std::vector<geo::
                                     ,render_settings_.padding};                              
 }
 
-void MapRenderer::RenderMap (svg::Document& doc,  const std::vector<std::vector<geo::Coordinates>>& geo_coordinates_for_each_bus,
+//Исправила замечание по поводу вектора. Про документ я не понимаю,что вы имеете в виду. 
+//Мы же рисуем в документе, почему это не задача map_render? В задании сказано, что 
+// сначала отрисовываеются автобусы потом остановки, это можно сделать тут и сразу добавить их в 
+//документ. Нет никакой путанницы. Можете сказать, как вы хотите, чтобы этот метод работал?
+// Мне надо создавать какую-то структуру с векторами в которую записываю названия остановок,  автобусов и их символы и это возвращать в request_handler и в нем потом их считывать заново? Я не понимаю 
+/*
+
+struct Picture {
+    std::vector<svg::Polyline> bus_route;
+    std::vector<svg::Text> buses_names;
+    std::vector<svg::Circle> stops_symbols;
+    std::vector<svg::Text> stops_names;
+    
+}
+типа такое создавать и возвращать в request_handler? Не понимаю зачем
+
+*/
+
+
+void MapRenderer::RenderMap (svg::Document& doc,  
 const std::vector<Bus*>& buses_ptrs, const std::vector<Stop*>& stops_ptrs) const {
 
     std::vector<geo::Coordinates> all_geo_coordinates;
@@ -147,15 +166,16 @@ const std::vector<Bus*>& buses_ptrs, const std::vector<Stop*>& stops_ptrs) const
        
     }
    
-    //svg::Document doc;
-    int bus_order = 0;
-    const SphereProjector sphere_projector = CreateSphereProjector(all_geo_coordinates);
+
     
     //----------------- Отрисовываем линиии маршрутов-----------------
-    for (const auto& geo_coordinates : geo_coordinates_for_each_bus) {
-       
-        //const SphereProjector sphere_projector = renderer_.CreateSphereProjector(all_geo_coordinates);
-        svg::Polyline polyline = DrawBusRoute(geo_coordinates, bus_order, sphere_projector);
+    for (const auto& bus : buses_ptrs) {
+       std::vector<geo::Coordinates> stops_coordinates_for_bus;
+
+        for (const auto& stop : bus->stops){
+            stops_coordinates_for_bus.push_back(stop->coordinates);
+        }
+        svg::Polyline polyline = DrawBusRoute(stops_coordinates_for_bus, bus_order, sphere_projector);
         ++bus_order;
         doc.Add(std::move(polyline));
     }
@@ -185,6 +205,8 @@ const std::vector<Bus*>& buses_ptrs, const std::vector<Stop*>& stops_ptrs) const
             doc.Add(std::move(text));
         }
     }
+    
+  
 
    
 }

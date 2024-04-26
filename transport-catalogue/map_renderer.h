@@ -130,6 +130,9 @@ struct RenderSettings {
     std::vector<svg::Color> color_palette;
 };
 
+
+
+
 class MapRenderer {
 public:    
     MapRenderer(const RenderSettings& render_settings)
@@ -145,7 +148,7 @@ public:
     std::vector<svg::Point> ProjectCoordinates (const std::vector<geo::Coordinates> geo_coords, const SphereProjector& sphere_projector) const;
     const SphereProjector CreateSphereProjector (const std::vector<geo::Coordinates> all_coords) const;
 
-  void RenderMap (svg::Document& doc,  const std::vector<std::vector<geo::Coordinates>>& geo_coordinates_for_each_bus,
+  void RenderMap (svg::Document& doc,
 const std::vector<Bus*>& buses_ptrs, const std::vector<Stop*>& stops_ptrs) const;
                                             
     

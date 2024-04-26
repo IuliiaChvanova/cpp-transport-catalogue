@@ -40,13 +40,9 @@ const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() c
     const std::set<std::string_view> sorted_buses_names = GetSortedBusesNamesOnRoute();
     std::vector<Bus*> buses_ptrs;
     std::vector<Stop*> stops_ptrs;
-    std::vector<std::vector<geo::Coordinates>> geo_coordinates_for_each_bus;
-    
-    std::vector<geo::Coordinates> geo_coordinates;
+
     
     for (const auto& bus_name : sorted_buses_names) {
-        geo_coordinates =  transport_catalogue_.GetStopsCoordinatesForBus(bus_name);
-        geo_coordinates_for_each_bus.push_back(geo_coordinates);
         buses_ptrs.push_back(transport_catalogue_.FindBus(bus_name));
     }
 
@@ -55,10 +51,7 @@ const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() c
         stops_ptrs.push_back(transport_catalogue_.FindStop(stop_name)); 
     }
 
-    renderer_.RenderMap (doc
-                        ,geo_coordinates_for_each_bus
-                        ,buses_ptrs
-                        ,stops_ptrs);
+    renderer_.RenderMap (doc ,buses_ptrs, stops_ptrs);
     doc.Render(output);
 
     return  doc;
