@@ -47,5 +47,3 @@ private:
     const TransportCatalogue& transport_catalogue_;
     const MapRenderer& renderer_;
 };
-
-

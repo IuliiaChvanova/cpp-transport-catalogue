@@ -32,7 +32,7 @@ const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() c
 }
 
 
- //Новая версия
+
 
 [[maybe_unused]] svg::Document RequestHandler::RenderMap(std::ostream& output) const {
     std::vector<std::variant<svg::Polyline,svg::Text, svg::Circle >> drawing;
@@ -70,74 +70,5 @@ const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() c
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-// Предыдущая версия 
-/*
- [[maybe_unused]] svg::Document RequestHandler::RenderMap(std::ostream& output) const {
-    const std::set<std::string_view> buses = GetSortedBusesNamesOnRoute();
-    std::vector<geo::Coordinates> geo_coordinates;
-    std::vector<geo::Coordinates> all_geo_coordinates = transport_catalogue_.GetAllStopsCoordinatesForBuses();
-     svg::Document doc;
-     int bus_order = 0;
-     const SphereProjector sphere_projector = renderer_.CreateSphereProjector(all_geo_coordinates);
-    //----------------- Отрисовываем линиии маршрутов-----------------
-    for (const auto& bus_name : buses) {
-        geo_coordinates =  transport_catalogue_.GetStopsCoordinatesForBus(bus_name);
-        //const SphereProjector sphere_projector = renderer_.CreateSphereProjector(all_geo_coordinates);
-        svg::Polyline polyline = renderer_.DrawBusRoute(geo_coordinates, bus_order, sphere_projector);
-        ++bus_order;
-        doc.Add(std::move(polyline));
-    }
-
-    //----------------- Названия Маршрутов-----------------
-    bus_order = 0;
-    for (const auto& bus_name : buses) {
-        
-       
-        std::vector<svg::Text> name = renderer_.DrawBusName(transport_catalogue_.FindBus(bus_name), bus_order, sphere_projector);
-        for (const auto& text : name) {
-            doc.Add(std::move(text));
-        }
-        ++bus_order;
-        
-    }
-
-
-
-    //----------------- Отрисовываем круги остановок-----------------
-
-    std::set<std::string_view> stops_names = transport_catalogue_.GetSortedStopsNames();
-    for (const auto& stop_name : stops_names){
-        Stop* stop = transport_catalogue_.FindStop(stop_name);
-        svg::Circle stop_symbol = renderer_.DrawStop(stop, sphere_projector);
-        doc.Add(std::move(stop_symbol));
-    }
-
-    //------------------Названия остановок-----------------
-    for (const auto& stop_name : stops_names){
-        Stop* stop = transport_catalogue_.FindStop(stop_name);
-        std::vector<svg::Text> name = renderer_.DrawStopName(stop, sphere_projector);
-        for (const auto& text : name) {
-            doc.Add(std::move(text));
-        }
-    }
-
-
-    doc.Render(output);
-    return  doc;
-}
-
-*/
 
 

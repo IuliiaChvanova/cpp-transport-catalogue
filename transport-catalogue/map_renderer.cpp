@@ -138,11 +138,6 @@ const SphereProjector MapRenderer::CreateSphereProjector(const std::vector<geo::
                                     ,render_settings_.padding};                              
 }
 
-
-
-// "Но формирование документа это не задача визуализатора. Поэтому этот функционал стоит отсюда убрать" Единственное что пришло в голову это записывать все созданные 
-//svg объекты в вектор с variant. И в request_handler добавлять в документ. 
-//Это то что вы имели в виду?
 void MapRenderer::RenderMap (std::vector<std::variant<svg::Polyline,svg::Text, svg::Circle >>& drawing,  
 const std::vector<Bus*>& buses_ptrs, const std::vector<Stop*>& stops_ptrs) const {
 
@@ -198,11 +193,7 @@ int bus_order = 0;
             //doc.Add(std::move(text));
         }
     }
-    
-  
 
-   
 }
-
 
 
