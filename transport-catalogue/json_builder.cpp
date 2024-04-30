@@ -2,7 +2,7 @@
 
 namespace json {
 
-KeyItemContext Builder::Key(std::string key) {
+Builder::KeyItemContext Builder::Key(std::string key) {
     if (nodes_stack_.empty()){
         throw std::logic_error("Dictionary was not initialized");
     }
@@ -50,7 +50,7 @@ Builder& Builder::Value(Node::Value value){
     return *this; 
 }
 
-DictItemContext Builder::StartDict(){
+Builder::DictItemContext Builder::StartDict(){
     if(Node{} == root_){
         root_ = Dict{};
         nodes_stack_.emplace_back(&root_);
@@ -74,7 +74,7 @@ DictItemContext Builder::StartDict(){
     return DictItemContext(*this);
 }
 
-ArrayItemContext Builder::StartArray(){
+Builder::ArrayItemContext Builder::StartArray(){
     if(Node{} == root_){
         root_ = Array{};
         nodes_stack_.emplace_back(&root_);
@@ -132,86 +132,52 @@ Node Builder::Build() {
 
 //different Contexts
 
-Builder& BaseContext::GetBuilder(){
+Builder& Builder::BaseContext::GetBuilder(){
         return builder_;
 }
+
+Builder::KeyItemContext Builder::BaseContext::Key(std::string key) {
+    return KeyItemContext(builder_.Key(key));
+}
+    
+Builder& Builder::BaseContext::Value(Node::Value value){
+    return builder_.Value(value);
+}
+    
+Builder::DictItemContext Builder::BaseContext::StartDict() {
+    return builder_.StartDict();
+}
+    
+Builder::ArrayItemContext Builder::BaseContext::StartArray() {
+    return builder_.StartArray();
+}
+    
+Builder& Builder::BaseContext::EndDict() {
+    return builder_.EndDict();
+}
+    
+Builder& Builder::BaseContext::EndArray() {
+    return builder_.EndArray();
+}  
+
 
 
 //rule 1 Непосредственно после Key вызван не Value, не StartDict и не StartArray.
 
-ValueItemContextAfterKey KeyItemContext::Value(Node::Value value) {
-    return ValueItemContextAfterKey(GetBuilder().Value(value));
-}
-
-
-DictItemContext KeyItemContext::StartDict() {
-    return GetBuilder().StartDict();
-}
-
-ArrayItemContext KeyItemContext::StartArray() {
-    return GetBuilder().StartArray();
-}
-
-
-//rule 2 После вызова Value, последовавшего за вызовом Key, вызван не Key и не EndDict.
-
-
-KeyItemContext ValueItemContextAfterKey::Key(std::string key) {
-    return GetBuilder().Key(key);
-}
-
-Builder& ValueItemContextAfterKey::EndDict() {
-    return GetBuilder().EndDict();
-}
-
-
-//rule 3  За вызовом StartDict следует не Key и не EndDict.
-
-KeyItemContext DictItemContext::Key(std::string key){
-    return GetBuilder().Key(key);
-}
-
-Builder& DictItemContext::EndDict(){
-    return GetBuilder().EndDict();
-}
-
+//ValueItemContextAfterKey KeyItemContext::Value(Node::Value value) {
+Builder::KeyItemContext Builder::KeyItemContext::Value(Node::Value value) {
+    return KeyItemContext(GetBuilder().Value(value));
+   
+} 
+    
 
 //rule 4 За вызовом StartArray следует не Value, не StartDict, не StartArray и не EndArray.
+//ItemContextAfterArrayWithValue ArrayItemContext::Value(Node::Value
 
-ItemContextAfterArrayWithValue ArrayItemContext::Value(Node::Value value) {
-    return ItemContextAfterArrayWithValue(GetBuilder().Value(value));
-}
+Builder::ArrayItemContext Builder::ArrayItemContext::Value(Node::Value value) {
+    return ArrayItemContext(GetBuilder().Value(value));
 
-DictItemContext ArrayItemContext::StartDict() {
-    return GetBuilder().StartDict();
-}
-
-ArrayItemContext  ArrayItemContext::StartArray() {
-    return GetBuilder().StartArray();
-}
-
-Builder& ArrayItemContext::EndArray() {
-    return GetBuilder().EndArray();
-}
-
-
-//rule 5 После вызова StartArray и серии Value следует не Value, не StartDict, не StartArray и не EndArray.
-    
-ItemContextAfterArrayWithValue ItemContextAfterArrayWithValue::Value(Node::Value value) {
-    return ItemContextAfterArrayWithValue(GetBuilder().Value(value));
-}
-
-DictItemContext ItemContextAfterArrayWithValue::StartDict() {
-    return GetBuilder().StartDict();
-}
-ArrayItemContext ItemContextAfterArrayWithValue::StartArray() {
-    return ArrayItemContext(GetBuilder().StartArray());
-}
-Builder& ItemContextAfterArrayWithValue::EndArray() {
-    return GetBuilder().EndArray();
-}
-
-
+}    
 
 }
 

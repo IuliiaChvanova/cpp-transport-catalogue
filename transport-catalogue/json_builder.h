@@ -2,14 +2,56 @@
 
 namespace json {
 
+class Builder {    
+
     class BaseContext;
     class KeyItemContext;
-    class ValueItemContextAfterKey;
     class DictItemContext;
     class ArrayItemContext;
-    class ItemContextAfterArrayWithValue;
+    
+    class BaseContext {
+public:
+    explicit BaseContext(Builder& builder_):builder_(builder_){};
+    Builder& GetBuilder();
+    KeyItemContext Key(std::string key);
+    Builder& Value(Node::Value value);
+    DictItemContext StartDict();
+    ArrayItemContext StartArray();
+    Builder& EndDict();
+    Builder& EndArray();
+private:
+    Builder& builder_;
+};
+    //rule 1 Непосредственно после Key вызван не Value, не StartDict и не StartArray.
+//rule 2 После вызова Value, последовавшего за вызовом Key, вызван не Key и не EndDict.   
+    class KeyItemContext: public BaseContext {
+public:    
+    explicit KeyItemContext(Builder& builder):BaseContext(builder){};
+  
+    KeyItemContext Value(Node::Value value);
+    Builder& EndArray() = delete;
+};
+    //rule 3  За вызовом StartDict следует не Key и не EndDict.
+    class DictItemContext: public BaseContext {
+public:
+    explicit DictItemContext(Builder& builder):BaseContext(builder){};
+    
+    Builder& Value(Node::Value value) = delete;
+    DictItemContext StartDict() = delete;
+    ArrayItemContext StartArray() = delete;
+    Builder& EndArray() = delete;
 
-class Builder {
+};
+    //rule 4 За вызовом StartArray следует не Value, не StartDict, не StartArray и не EndArray.
+//rule 5 После вызова StartArray и серии Value следует не Value, не StartDict, не StartArray и не EndArray.   
+    class ArrayItemContext: public BaseContext {
+public:    
+    explicit ArrayItemContext(Builder& builder):BaseContext(builder){};
+    
+    ArrayItemContext Value(Node::Value value);
+    KeyItemContext Key(std::string key) = delete;
+    Builder& EndDict() = delete;
+};
 public:
     Builder() = default;
     KeyItemContext Key(std::string key);
@@ -23,8 +65,6 @@ private:
     Node root_; 
     std::vector<Node*> nodes_stack_;
 };
-
-
 
 /*
 1) Непосредственно после Key вызван не Value, не StartDict и не StartArray.
@@ -43,72 +83,7 @@ json::Builder{}.StartArray().Value(1).Value(2).EndDict();  // правило 5
 */
 
 
-class BaseContext {
-public:
-    explicit BaseContext(Builder& builder_):builder_(builder_){};
-    Builder& GetBuilder();
-private:
-    Builder& builder_;
-};
+} //namespace json 
 
 
-//rule 1 Непосредственно после Key вызван не Value, не StartDict и не StartArray.
-class KeyItemContext: public BaseContext {
-public:    
-    explicit KeyItemContext(Builder& builder):BaseContext(builder){};
-    
-    ValueItemContextAfterKey Value(Node::Value value);
-    DictItemContext StartDict();
-    ArrayItemContext StartArray();
-};
-
-//rule 2 После вызова Value, последовавшего за вызовом Key, вызван не Key и не EndDict.
-
-class ValueItemContextAfterKey: public BaseContext {
-public: 
-    explicit ValueItemContextAfterKey(Builder& builder):BaseContext(builder){};
-    
-    KeyItemContext Key(std::string key);
-    Builder& EndDict();
-};
-
-
-
-//rule 3  За вызовом StartDict следует не Key и не EndDict.
-class DictItemContext: public BaseContext {
-public:
-    explicit DictItemContext(Builder& builder):BaseContext(builder){};
-    
-    KeyItemContext Key(std::string key);
-    Builder& EndDict();
-
-};
-
-
-//rule 4 За вызовом StartArray следует не Value, не StartDict, не StartArray и не EndArray.
-
-class ArrayItemContext: public BaseContext {
-public:    
-    explicit ArrayItemContext(Builder& builder):BaseContext(builder){};
-    
-    ItemContextAfterArrayWithValue Value(Node::Value value);
-    DictItemContext StartDict();
-    ArrayItemContext  StartArray();
-    Builder& EndArray();
-};
-
-
-//rule 5 После вызова StartArray и серии Value следует не Value, не StartDict, не StartArray и не EndArray.
-class ItemContextAfterArrayWithValue: public BaseContext {
-public: 
-    explicit ItemContextAfterArrayWithValue(Builder& builder):BaseContext(builder){};
-    
-    ItemContextAfterArrayWithValue Value(Node::Value value);
-    DictItemContext StartDict();
-    ArrayItemContext StartArray();
-    Builder& EndArray();
-};
-
-
-} //namespace json
 
