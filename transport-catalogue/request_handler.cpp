@@ -10,10 +10,13 @@
 
 
 
-RequestHandler::RequestHandler(const TransportCatalogue& db, const MapRenderer& renderer)
-    :transport_catalogue_(db), renderer_(renderer) { 
+RequestHandler::RequestHandler(const TransportCatalogue& db, const MapRenderer& renderer, const TransportRouter& router)
+    :transport_catalogue_(db), renderer_(renderer), router_(router) { 
 }
 
+const graph::DirectedWeightedGraph<double>& RequestHandler::GetGraph() const {
+    return router_.GetGraph();
+}
 
 
 // Возвращает маршруты, проходящие через остановку
@@ -29,6 +32,10 @@ const BusInfo RequestHandler::GetBusInfo(const std::string_view& bus_name) const
 
 const std::set<std::string_view>  RequestHandler::GetSortedBusesNamesOnRoute() const {
     return transport_catalogue_.GetSortedBusesNames();
+}
+
+std::optional<TransportRouter::RouteInfo> RequestHandler::FindRoute(std::string_view from, std::string_view to) const {
+    return router_.FindRoute(from, to);
 }
 
 

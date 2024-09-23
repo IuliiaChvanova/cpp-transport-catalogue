@@ -6,7 +6,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
-
+#include <cstdint>
 #include "domain.h"
 #include "geo.h"
 
@@ -35,11 +35,12 @@ public:
     std::vector<geo::Coordinates> GetAllStopsCoordinatesForBuses() const;
     const std::vector<std::string_view> GetAllStopsNames() const;
     const std::vector<std::string_view>  GetAllBusesNames() const;
+     int GetDistance(const Stop* stop_from, const Stop* stop_to) const;
     
 private:
     class PairPtrHasher{
         public:
-        size_t operator() (const std::pair<Stop*, Stop*> stops_pair) const{
+        size_t operator() (const std::pair< const Stop*, const Stop*> stops_pair) const{
             return static_cast<size_t>(reinterpret_cast<std::uintptr_t>(stops_pair.first)*37 + reinterpret_cast<std::uintptr_t>(stops_pair.second));
         }
 };
@@ -48,5 +49,5 @@ private:
     std::unordered_map<std::string_view, Stop*> stopname_to_stop_;
     std::unordered_map<std::string_view, Bus*> busname_to_bus_;
     std::unordered_map<Stop*, std::set<std::string>> stop_to_busname_; 
-    std::unordered_map<std::pair<Stop*, Stop*>, int, PairPtrHasher> distances_;
+    std::unordered_map<std::pair<const Stop*, const Stop*>, int, PairPtrHasher> distances_;
 };

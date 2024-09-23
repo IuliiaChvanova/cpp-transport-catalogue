@@ -9,8 +9,8 @@ void TransportCatalogue::AddStop(std::string_view name, geo::Coordinates coordin
 }
 
 void TransportCatalogue::AddDistance (std::string_view from_stop, std::string_view to_stop, int distance){
-    Stop* from_stop_ptr = stopname_to_stop_[from_stop];
-    Stop* to_stop_ptr = stopname_to_stop_[to_stop];
+    const Stop* from_stop_ptr = stopname_to_stop_[from_stop];
+    const Stop* to_stop_ptr = stopname_to_stop_[to_stop];
     distances_[std::pair{from_stop_ptr,to_stop_ptr}] = distance;
 }
 
@@ -23,6 +23,22 @@ std::optional<int> TransportCatalogue::GetDistance (std::string_view from_stop, 
         return std::nullopt;
     }
     
+}
+
+
+int TransportCatalogue::GetDistance(const Stop* stop_from, const Stop* stop_to) const {
+    if (stop_from == nullptr || stop_to == nullptr) {
+        throw std::invalid_argument("Stops are nullptr. Can not calculate distance");
+    }
+    if (distances_.count({stop_from, stop_to})) {
+        return distances_.at({stop_from, stop_to});
+    }
+    /*
+    if (stop_to_near_stop_.count({to, from})) {
+        return stop_to_near_stop_.at({to, from});
+    }
+    */
+    return 0;
 }
 
 /*

@@ -2,6 +2,8 @@
 
 #include "map_renderer.h"
 #include "transport_catalogue.h"
+#include "transport_router.h"
+
 
 
 
@@ -26,7 +28,7 @@ class RequestHandler {
 public:
     // MapRenderer понадобится в следующей части итогового проекта
    // RequestHandler(const TransportCatalogue& db, const renderer::MapRenderer& renderer);
-     RequestHandler(const TransportCatalogue& db, const MapRenderer& renderer);
+     RequestHandler(const TransportCatalogue& db, const MapRenderer& renderer, const TransportRouter& router);
 
     // Возвращает информацию о маршруте (запрос Bus)
     const BusInfo GetBusInfo(const std::string_view& bus_name) const;
@@ -39,6 +41,9 @@ public:
     // Этот метод будет нужен в следующей части итогового проекта
     
    [[maybe_unused]]svg::Document RenderMap (std::ostream& output) const;
+    [[nodiscard]] std::optional<TransportRouter::RouteInfo> FindRoute(std::string_view from, std::string_view to) const;
+   const graph::DirectedWeightedGraph<double>& GetGraph() const;
+    
    
 
 private:
@@ -46,4 +51,5 @@ private:
     // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"
     const TransportCatalogue& transport_catalogue_;
     const MapRenderer& renderer_;
+    const TransportRouter& router_;
 };

@@ -155,4 +155,3 @@ private:
     const RenderSettings render_settings_;  
     
 };
-

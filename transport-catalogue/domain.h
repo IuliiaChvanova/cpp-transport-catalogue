@@ -2,7 +2,7 @@
 #include <set>
 #include <string>
 #include <vector>
-
+#include <cstdint>
 #include "geo.h"
 /*
  * В этом файле вы можете разместить классы/структуры, которые являются частью предметной области (domain)
@@ -30,7 +30,7 @@ struct Bus {
 struct BusInfo {
     int stops_on_route;
     int unique_stops;
-    int route_length = 0;
+    double route_length = 0;
     double curvature = 0;
     bool found = true;
 };
