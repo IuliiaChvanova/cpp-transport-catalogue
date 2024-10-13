@@ -14,9 +14,9 @@ RequestHandler::RequestHandler(const TransportCatalogue& db, const MapRenderer& 
     :transport_catalogue_(db), renderer_(renderer), router_(router) { 
 }
 
-const graph::DirectedWeightedGraph<double>& RequestHandler::GetGraph() const {
-    return router_.GetGraph();
-}
+
+
+
 
 
 // Возвращает маршруты, проходящие через остановку

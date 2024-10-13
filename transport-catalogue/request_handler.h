@@ -42,11 +42,14 @@ public:
     
    [[maybe_unused]]svg::Document RenderMap (std::ostream& output) const;
     [[nodiscard]] std::optional<TransportRouter::RouteInfo> FindRoute(std::string_view from, std::string_view to) const;
-   const graph::DirectedWeightedGraph<double>& GetGraph() const;
+   
     
+
    
 
 private:
+    
+    
   const std::set<std::string_view> GetSortedBusesNamesOnRoute() const;
     // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"
     const TransportCatalogue& transport_catalogue_;

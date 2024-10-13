@@ -51,6 +51,8 @@ int main() {
     const RenderSettings& render_settings = json_reader.GetRenderSettings();
     const MapRenderer map_renderer(render_settings);
     const TransportRoutingSettings& router_settings = json_reader.GetRouterSettings();
+   //TransportRouterBuilder router_builder(catalogue, router_settings);
+    //TransportRouter router = router_builder.Build();
     TransportRouter router(catalogue, router_settings);
     RequestHandler request_handler(catalogue, map_renderer, router);
    // svg::Document doc_out = request_handler.RenderMap(std::cout);

@@ -3,7 +3,7 @@
 TransportRouter::TransportRouter(const TransportCatalogue& transport_catalogue, const TransportRoutingSettings& settings)
     :settings_(settings)
     , transport_catalogue_(transport_catalogue){
-        graph::DirectedWeightedGraph<double> filled_graph(transport_catalogue_.GetAllStopsNames().size()*2);
+        graph::DirectedWeightedGraph<double> filled_graph(transport_catalogue_.GetAllStopsNames().size() * 2);
         graph::VertexId vertex_id = 0;
         FillGraphWithStops(transport_catalogue_,  vertex_id, filled_graph);
         FillGraphWithBuses(transport_catalogue_, filled_graph);
@@ -12,13 +12,35 @@ TransportRouter::TransportRouter(const TransportCatalogue& transport_catalogue, 
     }
 
 
-  const graph::DirectedWeightedGraph<double>& TransportRouter::GetGraph() const{
-    return graph_;
+std::optional<typename TransportRouter::RouteInfo> TransportRouter::FindRoute(std::string_view stop_from, std::string_view stop_to) const {
+     std::optional<typename graph::Router<double>::RouteInfo> route_info = router_->BuildRoute(stop_to_id_.at(std::string(stop_from)), stop_to_id_.at(std::string(stop_to)));
+    if (!route_info.has_value()) {
+        return std::nullopt;
+    }
+ TransportRouter::RouteInfo transport_info;
+
+    transport_info.bus_wait_time = settings_.bus_waiting_time;
+    transport_info.total_weight = route_info->weight;
+    transport_info.edges.reserve(route_info->edges.size());
+
+   
+    for (auto &edge_id: route_info.value().edges) {
+        const graph::Edge<double> edge = graph_.GetEdge(edge_id);
+        
+        TransportRouter::Edge transport_edge{
+                edge.name,
+                edge.span_count,
+                edge.weight
+             };
+
+        transport_info.edges.push_back(transport_edge);
+    }
+
+   
+    return transport_info;
+ 
 }
 
-std::optional<graph::Router<double>::RouteInfo> TransportRouter::FindRoute(std::string_view stop_from, std::string_view stop_to) const {
-    return router_->BuildRoute(stop_to_id_.at(std::string(stop_from)), stop_to_id_.at(std::string(stop_to)));
-}
 
 void TransportRouter::FillGraphWithStops(const TransportCatalogue& transport_catalogue
                                         ,graph::VertexId& vertex_id

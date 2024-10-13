@@ -28,7 +28,7 @@ private:
      //-------Functions for map_render ------------
    void AddColor (std::vector<json::Node> color_vector, json::Node underlayer_color_vector, std::vector<svg::Color>& color_palette, svg::Color& underlayer_color );
   //  void AddRouterSettingsFromJson (TransportRouterBuilder& builder);
-  void AddRouteInfoInJSON ( RequestHandler& request_handler, int request_id, std::optional<TransportRouter::RouteInfo>& route, json::Array& out_array);
+  void AddRouteInfoInJSON ( /*RequestHandler& request_handler,*/ int request_id, std::optional<TransportRouter::RouteInfo>& route, json::Array& out_array);
     
     json::Document requests_;
 };

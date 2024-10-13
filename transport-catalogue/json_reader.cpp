@@ -189,7 +189,7 @@ void JsonReader::AddVisualisationMapInJSON (RequestHandler& request_handler, int
           
 }
 
- void JsonReader::AddRouteInfoInJSON ( RequestHandler& request_handler, int request_id, std::optional<TransportRouter::RouteInfo>& route, json::Array& out_array) {
+ void JsonReader::AddRouteInfoInJSON (/*RequestHandler& request_handler,*/ int request_id, std::optional<TransportRouter::RouteInfo>& route, json::Array& out_array) {
     using namespace json;
     Node result;
      
@@ -207,6 +207,37 @@ void JsonReader::AddVisualisationMapInJSON (RequestHandler& request_handler, int
    Array items;
    double total_time = 0.0;
    items.reserve(route.value().edges.size());
+        
+   //     new code
+        
+   for (auto &edge /*edge_id*/: route.value().edges) {
+      // const graph::Edge<double> edge = request_handler.GetGraph().GetEdge(edge_id);
+        if (edge.span_count == 0) {
+            items.emplace_back(
+                Builder{}.StartDict()
+                                .Key("stop_name").Value(std::string(edge.name))
+                                .Key("time").Value(edge.weight)
+                                .Key("type").Value("Wait")
+                         .EndDict()
+                         .Build()
+            );
+
+            total_time += edge.weight;
+        } else {
+            items.emplace_back(
+                Builder{}.StartDict()
+                                .Key("bus").Value(std::string(edge.name))
+                                .Key("span_count").Value(static_cast<int>(edge.span_count))
+                                .Key("time").Value(edge.weight)
+                                .Key("type").Value("Bus")
+                          .EndDict()
+                          .Build()
+            );
+
+            total_time += edge.weight;
+        }     
+        
+    /*    old code
     for (auto &edge_id: route.value().edges) {
         const graph::Edge<double> edge = request_handler.GetGraph().GetEdge(edge_id);
         if (edge.span_count == 0) {
@@ -233,6 +264,7 @@ void JsonReader::AddVisualisationMapInJSON (RequestHandler& request_handler, int
 
             total_time += edge.weight;
         }
+        */
     }
      
    
@@ -272,7 +304,8 @@ json::Document JsonReader::MakeJsonDocument(RequestHandler& request_handler){
             std::string_view from = request_map.at("from").AsString();
             std::string_view to = request_map.at("to").AsString();
             auto route = request_handler.FindRoute(from, to);
-            AddRouteInfoInJSON (request_handler, request_id, route, out_array);
+           AddRouteInfoInJSON (/*request_handler,*/ request_id, route, out_array);
+            //AddRouteInfoInJSON (request_handler, request_id, route, out_array);
             }  
     }
         Document output(out_array);
@@ -329,6 +362,9 @@ void JsonReader::AddColor (std::vector<json::Node> color_vector, json::Node unde
         } 
     }
 }
+
+
+
 
 
 RenderSettings JsonReader::GetRenderSettings(){
